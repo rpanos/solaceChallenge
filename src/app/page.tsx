@@ -10,7 +10,6 @@ import { AdvocateDTO } from '@solace/types';
 
 export default function Home() {
   const [advocates, setAdvocates] = useState<AdvocateDTO[]>([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState<AdvocateDTO[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,12 +20,13 @@ export default function Home() {
     console.log('fetching advocates...');
     setLoading(true);
     setError(null);
-    fetch(`/api/advocates?page=${currentPage}&limit=10`).then((response) => {
+    fetch(
+      `/api/advocates?page=${currentPage}&limit=10&filter=${searchTerm}`,
+    ).then((response) => {
       response
         .json()
         .then((jsonResponse) => {
           setAdvocates(jsonResponse.data);
-          setFilteredAdvocates(jsonResponse.data);
           setTotalPages(Math.ceil(jsonResponse.total / 10));
           setLoading(false);
         })
@@ -35,56 +35,19 @@ export default function Home() {
           setError('Failed to load advocates');
         });
     });
-  }, [currentPage]);
-
-  const updateFilteredAdvocates = useCallback(
-    (value: string) => {
-      console.log('updating filtered advocates with value:', value);
-
-      const filteredAdvocates = advocates.filter((advocate) => {
-        const keys: (keyof AdvocateDTO)[] = [
-          'firstName',
-          'lastName',
-          'city',
-          'degree',
-          'yearsOfExperience',
-        ];
-        const searchTerm = value.toLowerCase();
-        for (const key of keys) {
-          if (String(advocate[key]).toLowerCase().includes(searchTerm)) {
-            return true;
-          }
-        }
-        if (
-          Array.isArray(advocate.specialties) &&
-          advocate.specialties.some((s) =>
-            String(s).toLowerCase().includes(searchTerm),
-          )
-        ) {
-          return true;
-        }
-        return false;
-      });
-
-      console.log('filtered advocates', filteredAdvocates);
-      setFilteredAdvocates(filteredAdvocates);
-    },
-    [advocates],
-  );
+  }, [currentPage, searchTerm]);
 
   const debouncedFilter = useMemo(
-    () => debounce((value: string) => updateFilteredAdvocates(value), 300),
-    [updateFilteredAdvocates],
+    () => debounce((value: string) => setSearchTerm(value), 300),
+    [],
   );
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setSearchTerm(value);
     debouncedFilter(value);
   };
 
   const onResetClick = () => {
-    console.log(advocates);
     setSearchTerm('');
     debouncedFilter('');
   };
@@ -137,7 +100,7 @@ export default function Home() {
           {/* Main: Table */}
           <div className="flex-1 w-full">
             <AdvocatesTable
-              filteredAdvocates={filteredAdvocates}
+              filteredAdvocates={advocates}
               loading={loading}
               error={error}
             />
