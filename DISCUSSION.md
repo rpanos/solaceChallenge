@@ -12,6 +12,7 @@ These are the areas I would address if I had more time:
 - Light/dark mode toggle (optional, for extra polish)
 - Add observability, especially logs
 - Specialties should probably be another table
+- I am massively embarassed with the lack of automated tests here
 - I tried to refine colum width and make the specialties col very configurable but much more work could be done there
 
 
