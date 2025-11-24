@@ -28,7 +28,6 @@ export default function Home() {
           setLoading(false);
         })
         .catch(() => {
-          // DO WE HAVE ERROR DATA. 761
           setLoading(false);
           setError('Failed to load advocates');
         });
@@ -89,7 +88,7 @@ export default function Home() {
 
   return (
     <main>
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-2">Solace Advocates</h1>
         <p className="text-lg text-muted-foreground mb-6">
           Find the right advocate for your needs

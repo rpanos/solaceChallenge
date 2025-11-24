@@ -18,22 +18,35 @@ export const SpecialtiesCell: React.FC<SpecialtiesCellProps> = ({
 }) => {
   const visible = specialties.slice(0, maxVisible);
   const hiddenCount = specialties.length - maxVisible;
+
+  // Adjust column width to be significantly wider
   return (
-    <div className="flex flex-wrap gap-1 items-center">
-      {visible.map((s) => (
-        <span
-          key={s}
-          className="inline-block bg-blue-100 text-blue-800 rounded px-2 py-1 text-xs max-w-[180px] truncate"
-          title={s}
-        >
-          {s}
-        </span>
-      ))}
+    <div className="flex flex-col gap-2">
+      {/* Grid for visible specialties */}
+      <div
+        className="grid gap-2"
+        style={{
+          gridTemplateColumns: `repeat(${perRowCount}, minmax(0, 1fr))`,
+          columnGap: '16px', // Add extra spacing between columns
+        }}
+      >
+        {visible.map((specialty) => (
+          <span
+            key={specialty}
+            className="inline-block bg-blue-100 text-blue-800 rounded px-6 py-3 text-sm truncate"
+            title={specialty}
+          >
+            {specialty}
+          </span>
+        ))}
+      </div>
+
+      {/* Tooltip for hidden specialties */}
       {hiddenCount > 0 && (
         <Tooltip>
           <TooltipTrigger asChild>
             <span
-              className="inline-block bg-gray-200 text-gray-700 rounded px-2 py-1 text-xs cursor-pointer"
+              className="inline-block bg-gray-200 text-gray-700 rounded px-6 py-3 text-sm cursor-pointer"
               tabIndex={0}
             >
               +{hiddenCount} more

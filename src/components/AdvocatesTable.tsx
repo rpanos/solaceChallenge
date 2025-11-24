@@ -29,14 +29,14 @@ export const AdvocatesTable: React.FC<AdvocatesTableProps> = ({
     return <div className="py-8 text-center">No advocates found.</div>;
 
   return (
-    <Table>
+    <Table className="table-auto"> {/* Changed to table-auto for proportional column widths */}
       <TableHeader>
         <TableRow>
           <TableHead>First Name</TableHead>
           <TableHead>Last Name</TableHead>
           <TableHead>City</TableHead>
           <TableHead>Degree</TableHead>
-          <TableHead>Specialties</TableHead>
+          <TableHead className="w-2/5">Specialties</TableHead>
           <TableHead>Years of Experience</TableHead>
           <TableHead>Phone Number</TableHead>
         </TableRow>
