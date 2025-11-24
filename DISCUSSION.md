@@ -15,4 +15,4 @@ These are the areas I would address if I had more time:
 - I tried to refine colum width and make the specialties col very configurable but much more work could be done there
 
 
- ...but most of all I would explain more about why I made these changes.  Since I am safely over 2 hrs, I am hoping most are self explanitory and I sincerely look fwd to discussing my changes. 
+ ...but most of all, if I had more time I would provide better explanations about why I made these changes.  Since I am safely over 2 hrs, I am hoping most are self explanitory and I sincerely look fwd to discussing my changes. 
