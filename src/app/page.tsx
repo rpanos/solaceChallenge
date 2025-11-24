@@ -2,21 +2,22 @@
 
 import { useEffect, useState } from 'react';
 
+import { AdvocateDTO } from '@solace/types';
+
 export default function Home() {
-  const [advocates, setAdvocates] = useState([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState([]);
+  const [advocates, setAdvocates] = useState<AdvocateDTO[]>([]);
+  const [filteredAdvocates, setFilteredAdvocates] = useState<AdvocateDTO[]>([]);
 
   useEffect(() => {
-    console.log('fetching advocates...');
-    fetch('/api/advocates').then((response) => {
-      response.json().then((jsonResponse) => {
+    fetch('/api/advocates')
+      .then((response) => response.json())
+      .then((jsonResponse: { data: AdvocateDTO[] }) => {
         setAdvocates(jsonResponse.data);
         setFilteredAdvocates(jsonResponse.data);
       });
-    });
   }, []);
 
-  const onChange = (e) => {
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
 
     document.getElementById('search-term').innerHTML = searchTerm;
@@ -67,7 +68,7 @@ export default function Home() {
           <th>Phone Number</th>
         </thead>
         <tbody>
-          {filteredAdvocates.map((advocate, idx) => {
+          {filteredAdvocates.map((advocate: AdvocateDTO, idx) => {
             return (
               <tr key={advocate.id || idx}>
                 <td>{advocate.firstName}</td>
