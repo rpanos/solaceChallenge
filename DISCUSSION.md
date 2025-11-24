@@ -13,3 +13,6 @@ These are the areas I would address if I had more time:
 - Add observability, especially logs
 - Specialties should probably be another table
 - I tried to refine colum width and make the specialties col very configurable but much more work could be done there
+
+
+ ...but most of all I would explain more about why I made these changes.  Since I am safely over 2 hrs, I am hoping most are self explanitory and I sincerely look fwd to discussing my changes. 
