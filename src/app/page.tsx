@@ -14,17 +14,20 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     console.log('fetching advocates...');
     setLoading(true);
     setError(null);
-    fetch('/api/advocates').then((response) => {
+    fetch(`/api/advocates?page=${currentPage}&limit=10`).then((response) => {
       response
         .json()
         .then((jsonResponse) => {
           setAdvocates(jsonResponse.data);
           setFilteredAdvocates(jsonResponse.data);
+          setTotalPages(Math.ceil(jsonResponse.total / 10));
           setLoading(false);
         })
         .catch(() => {
@@ -32,7 +35,7 @@ export default function Home() {
           setError('Failed to load advocates');
         });
     });
-  }, []);
+  }, [currentPage]);
 
   const updateFilteredAdvocates = useCallback(
     (value: string) => {
@@ -86,6 +89,18 @@ export default function Home() {
     debouncedFilter('');
   };
 
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
   return (
     <main>
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -126,6 +141,25 @@ export default function Home() {
               loading={loading}
               error={error}
             />
+            <div className="flex justify-between mt-4">
+              <button
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       </div>
