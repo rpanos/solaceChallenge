@@ -17,6 +17,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [minYears, setMinYears] = useState<number>(0);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -44,7 +45,7 @@ export default function Home() {
     abortControllerRef.current = controller;
 
     fetch(
-      `/api/advocates?page=${currentPage}&limit=10&filter=${debouncedSearchTerm}`,
+      `/api/advocates?page=${currentPage}&limit=10&filter=${debouncedSearchTerm}&minYears=${minYears}`,
       {
         signal: controller.signal,
       },
@@ -68,11 +69,11 @@ export default function Home() {
           setError('Failed to load advocates');
         }
       });
-  }, [currentPage, debouncedSearchTerm]);
+  }, [currentPage, debouncedSearchTerm, minYears]);
 
   useEffect(() => {
     setCurrentPage(1); // Reset to the first page when the search term changes
-  }, [searchTerm]);
+  }, [searchTerm, minYears]);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -81,6 +82,10 @@ export default function Home() {
 
   const onResetClick = () => {
     setSearchTerm('');
+  };
+
+  const onMinYearsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setMinYears(parseInt(e.target.value, 10));
   };
 
   const handleNextPage = () => {
@@ -127,6 +132,26 @@ export default function Home() {
                 </button>
               )}
             </div>
+          </div>
+          <div className="w-full md:w-64 shrink-0 mb-6 md:mb-0">
+            <label
+              htmlFor="minYears"
+              className="block text-sm font-medium mb-2"
+            >
+              Minimum Years of Experience
+            </label>
+            <select
+              id="minYears"
+              value={minYears}
+              onChange={onMinYearsChange}
+              className="w-full border border-gray-300 rounded px-3 py-2"
+            >
+              <option value="0">No Minimum</option>
+              <option value="1">1+ Years</option>
+              <option value="3">3+ Years</option>
+              <option value="5">5+ Years</option>
+              <option value="10">10+ Years</option>
+            </select>
           </div>
           {/* Main: Table */}
           <div className="flex-1 w-full">
