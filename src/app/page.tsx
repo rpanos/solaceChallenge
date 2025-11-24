@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import { X } from 'lucide-react';
+import { useRef } from 'react';
 
 import { AdvocatesTable } from '@/components/AdvocatesTable';
 import { Input } from '@/components/ui/input';
@@ -11,45 +12,75 @@ import { AdvocateDTO } from '@solace/types';
 export default function Home() {
   const [advocates, setAdvocates] = useState<AdvocateDTO[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300); // Debounce delay
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
   useEffect(() => {
     console.log('fetching advocates...');
     setLoading(true);
     setError(null);
+
+    // Cancel the previous request if it exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     fetch(
-      `/api/advocates?page=${currentPage}&limit=10&filter=${searchTerm}`,
-    ).then((response) => {
-      response
-        .json()
-        .then((jsonResponse) => {
-          setAdvocates(jsonResponse.data);
-          setTotalPages(Math.ceil(jsonResponse.total / 10));
-          setLoading(false);
-        })
-        .catch(() => {
+      `/api/advocates?page=${currentPage}&limit=10&filter=${debouncedSearchTerm}`,
+      {
+        signal: controller.signal,
+      },
+    )
+      .then((response) => {
+        response
+          .json()
+          .then((jsonResponse) => {
+            setAdvocates(jsonResponse.data);
+            setTotalPages(Math.ceil(jsonResponse.total / 10));
+            setLoading(false);
+          })
+          .catch(() => {
+            setLoading(false);
+            setError('Failed to load advocates');
+          });
+      })
+      .catch((err) => {
+        if (err.name !== 'AbortError') {
           setLoading(false);
           setError('Failed to load advocates');
-        });
-    });
-  }, [currentPage, searchTerm]);
+        }
+      });
+  }, [currentPage, debouncedSearchTerm]);
 
-  const debouncedFilter = useMemo(
-    () => debounce((value: string) => setSearchTerm(value), 300),
-    [],
-  );
+  useEffect(() => {
+    setCurrentPage(1); // Reset to the first page when the search term changes
+  }, [searchTerm]);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    debouncedFilter(value);
+    setSearchTerm(value);
   };
 
   const onResetClick = () => {
     setSearchTerm('');
-    debouncedFilter('');
   };
 
   const handleNextPage = () => {

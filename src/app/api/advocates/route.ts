@@ -19,9 +19,11 @@ export async function GET(req: Request) {
       ilike(advocates.lastName, `%${filter}%`),
       ilike(advocates.city, `%${filter}%`),
       ilike(advocates.degree, `%${filter}%`),
-      sql`${advocates.specialties} @> ${JSON.stringify([filter])}`,
+      sql`${advocates.specialties}::text ILIKE ${`%${filter}%`}`,
     ),
-    sql`${advocates.yearsOfExperience} >= ${minYears}`,
+    minYears > 0
+      ? sql`${advocates.yearsOfExperience} >= ${minYears}`
+      : sql`TRUE`,
   );
 
   const data: Advocate[] = await db
