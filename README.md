@@ -38,12 +38,39 @@ Wherever a deeper optimization or refactor could not be completed within the tim
 
 ---
 
-## 🚀 Running the Application
+## 🚀 How to Run the Application
 
+To run this application locally, follow these steps:
+
+### 1. Start the Database
+This application uses a PostgreSQL database, which is managed using Docker. Ensure Docker is installed and running on your system.
+
+Run the following command to start the database:
 ```bash
-# 1. Install dependencies
-npm install
+docker-compose up -d
+```
+This will start the PostgreSQL database in the background. The database will be accessible at `localhost:5432` with the following credentials:
+- **User**: `postgres`
+- **Password**: `password`
+- **Database**: `solaceassignment`
 
-# 2. Start the development server
+To verify the database is running, use:
+```bash
+docker ps
+```
+Ensure the `db` service is listed and running.
+
+### 2. Install Dependencies
+Install the required Node.js dependencies:
+```bash
+npm install
+```
+
+### 3. Start the Development Server
+Run the following command to start the development server:
+```bash
 npm run dev
 ```
+The application will be available at `http://localhost:3000`.
+
+---
