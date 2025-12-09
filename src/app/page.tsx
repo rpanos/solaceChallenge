@@ -1,91 +1,187 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { debounce } from 'lodash';
+import { X } from 'lucide-react';
+import { useRef } from 'react';
+
+import { AdvocatesTable } from '@/components/AdvocatesTable';
+import { Input } from '@/components/ui/input';
+import { AdvocateDTO } from '@solace/types';
 
 export default function Home() {
-  const [advocates, setAdvocates] = useState([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState([]);
+  const [advocates, setAdvocates] = useState<AdvocateDTO[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [minYears, setMinYears] = useState<number>(0);
+
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    console.log("fetching advocates...");
-    fetch("/api/advocates").then((response) => {
-      response.json().then((jsonResponse) => {
-        setAdvocates(jsonResponse.data);
-        setFilteredAdvocates(jsonResponse.data);
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300); // Debounce delay
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
+  useEffect(() => {
+    console.log('fetching advocates...');
+    setLoading(true);
+    setError(null);
+
+    // Cancel the previous request if it exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    fetch(
+      `/api/advocates?page=${currentPage}&limit=10&filter=${debouncedSearchTerm}&minYears=${minYears}`,
+      {
+        signal: controller.signal,
+      },
+    )
+      .then((response) => {
+        response
+          .json()
+          .then((jsonResponse) => {
+            setAdvocates(jsonResponse.data);
+            setTotalPages(Math.ceil(jsonResponse.total / 10));
+            setLoading(false);
+          })
+          .catch(() => {
+            setLoading(false);
+            setError('Failed to load advocates');
+          });
+      })
+      .catch((err) => {
+        if (err.name !== 'AbortError') {
+          setLoading(false);
+          setError('Failed to load advocates');
+        }
       });
-    });
-  }, []);
+  }, [currentPage, debouncedSearchTerm, minYears]);
 
-  const onChange = (e) => {
-    const searchTerm = e.target.value;
+  useEffect(() => {
+    setCurrentPage(1); // Reset to the first page when the search term changes
+  }, [searchTerm, minYears]);
 
-    document.getElementById("search-term").innerHTML = searchTerm;
-
-    console.log("filtering advocates...");
-    const filteredAdvocates = advocates.filter((advocate) => {
-      return (
-        advocate.firstName.includes(searchTerm) ||
-        advocate.lastName.includes(searchTerm) ||
-        advocate.city.includes(searchTerm) ||
-        advocate.degree.includes(searchTerm) ||
-        advocate.specialties.includes(searchTerm) ||
-        advocate.yearsOfExperience.includes(searchTerm)
-      );
-    });
-
-    setFilteredAdvocates(filteredAdvocates);
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
   };
 
-  const onClick = () => {
-    console.log(advocates);
-    setFilteredAdvocates(advocates);
+  const onResetClick = () => {
+    setSearchTerm('');
+  };
+
+  const onMinYearsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setMinYears(parseInt(e.target.value, 10));
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
   };
 
   return (
-    <main style={{ margin: "24px" }}>
-      <h1>Solace Advocates</h1>
-      <br />
-      <br />
-      <div>
-        <p>Search</p>
-        <p>
-          Searching for: <span id="search-term"></span>
+    <main>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-2">Solace Advocates</h1>
+        <p className="text-lg text-muted-foreground mb-6">
+          Find the right advocate for your needs
         </p>
-        <input style={{ border: "1px solid black" }} onChange={onChange} />
-        <button onClick={onClick}>Reset Search</button>
+        <div className="flex flex-col md:flex-row gap-8 items-start">
+          {/* Sidebar: Search input */}
+          <div className="w-full md:w-64 shrink-0 mb-6 md:mb-0">
+            <label htmlFor="search" className="block text-sm font-medium mb-2">
+              Search Advocates
+            </label>
+            <div className="relative flex items-center">
+              <Input
+                id="search"
+                placeholder="Search by name, city, degree, specialty..."
+                value={searchTerm}
+                onChange={onChange}
+                className="pr-10"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={onResetClick}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label="Clear search"
+                >
+                  <X size={18} />
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="w-full md:w-64 shrink-0 mb-6 md:mb-0">
+            <label
+              htmlFor="minYears"
+              className="block text-sm font-medium mb-2"
+            >
+              Minimum Years of Experience
+            </label>
+            <select
+              id="minYears"
+              value={minYears}
+              onChange={onMinYearsChange}
+              className="w-full border border-gray-300 rounded px-3 py-2"
+            >
+              <option value="0">No Minimum</option>
+              <option value="1">1+ Years</option>
+              <option value="3">3+ Years</option>
+              <option value="5">5+ Years</option>
+              <option value="10">10+ Years</option>
+            </select>
+          </div>
+          {/* Main: Table */}
+          <div className="flex-1 w-full">
+            <AdvocatesTable
+              filteredAdvocates={advocates}
+              loading={loading}
+              error={error}
+            />
+            <div className="flex justify-between mt-4">
+              <button
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-      <br />
-      <br />
-      <table>
-        <thead>
-          <th>First Name</th>
-          <th>Last Name</th>
-          <th>City</th>
-          <th>Degree</th>
-          <th>Specialties</th>
-          <th>Years of Experience</th>
-          <th>Phone Number</th>
-        </thead>
-        <tbody>
-          {filteredAdvocates.map((advocate) => {
-            return (
-              <tr>
-                <td>{advocate.firstName}</td>
-                <td>{advocate.lastName}</td>
-                <td>{advocate.city}</td>
-                <td>{advocate.degree}</td>
-                <td>
-                  {advocate.specialties.map((s) => (
-                    <div>{s}</div>
-                  ))}
-                </td>
-                <td>{advocate.yearsOfExperience}</td>
-                <td>{advocate.phoneNumber}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
     </main>
   );
 }
