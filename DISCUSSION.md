@@ -7,11 +7,10 @@ These are the areas I would address if I had more time:
 - Add responsiveness to table columns (truncate, hide, or compress on small screens)
   - Responsivenenss is something that could be debated for hours. :wink:
 - Accessibility improvements (labels, aria, scope, focus states)
-- Empty state & error state (friendly message or illustration)
 - Loading spinner (instead of just “Loading…” text)
 - Light/dark mode toggle (optional, for extra polish)
 - Add observability, especially logs
-- Specialties should probably be another table
+- Specialties should probably be another table AND we could use indexing
 - I am massively embarassed with the lack of automated tests here
 - I tried to refine colum width and make the specialties col very configurable but much more work could be done there
 
