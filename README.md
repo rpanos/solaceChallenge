@@ -1,57 +1,49 @@
-## Solace Candidate Assignment
+# Solace Take-Home Challenge — Submission
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This repository contains my implementation of the Solace Staff Software Engineer take-home assignment.  
+The challenge centers on improving a deliberately flawed full-stack Next.js application used to help patients search for Solace advocates. The baseline code was intentionally buggy, unoptimized, and stylistically inconsistent to evaluate real-world engineering judgment.
 
-## 📌 Summary
+My goal was to fix high-impact issues, clarify data flow, strengthen the UI, and leave the codebase in a more predictable, maintainable state — all within the suggested ~2-hour timebox.
 
-This assignment centers on improving an intentionally flawed full-stack Next.js application used to help patients search for Solace advocates. The baseline code was designed to contain structural issues, performance pitfalls, and UX problems. The goal was not to complete a polished product, but to demonstrate engineering judgment under realistic time constraints.
+For deeper architectural thoughts, additional options I considered, and improvements I would pursue with more time,  
+**please see [`DISCUSSION.md`](./DISCUSSION.md).**
 
-The challenge asked for three main areas of focus:
+---
 
-1. **Correctness:** identify and fix obvious bugs and anti-patterns in both frontend and backend code.
-2. **UX / Design:** improve the clarity, usability, and visual presentation of the advocate search flow. Solace emphasizes design quality, so part of this work involved clarifying interactions rather than adding features.
-3. **Performance Thinking:** evaluate the existing implementation through the lens of scale (hundreds of thousands of advocates), and make improvements that move the codebase toward efficient querying and rendering, even if not all optimizations can be implemented in a two-hour window.
+## 📌 What This Submission Covers
 
-Because the prompt intentionally encourages open-ended interpretation, I focused on changes that would have the highest real-world impact for a patient-facing application: improving data flow, reducing unnecessary work in the rendering pipeline, clarifying components, and making the UI more coherent and predictable.
+The assignment asked for three main areas of focus:
 
-Given the recommended ~2-hour limit, I constrained my work to high-leverage improvements and documented additional recommendations in [`DISCUSSION.md`](./DISCUSSION.md). That document outlines broader architectural and performance considerations I would pursue in a production environment, including validation, search heuristics, and backend indexing strategies.
+1. **Fix glaring bugs and anti-patterns** in both frontend and backend code.
+2. **Improve the design and UX** of the advocate search table. Solace values design, so part of the work involved clarifying layout, visual hierarchy, and user flow.
+3. **Consider performance** at the scale of _hundreds of thousands_ of advocates. The goal was not full optimization, but demonstrating awareness of architectural bottlenecks and opportunities.
 
-To match Solace’s preferred workflow, my updates are submitted as pull requests with explanations of each change and the reasoning behind it.
+My work concentrates on improvements that materially affect correctness, usability, readability, and scalability at a foundational level.  
+Additional architectural thoughts and a broader roadmap are included in **`DISCUSSION.md`**.
 
-## Getting Started
+---
 
-Install dependencies
+## 🧠 Approach & Philosophy
+
+Since the prompt encourages open-ended thinking rather than “feature completeness,” I approached this as I would a new team codebase:
+
+- Identify structural issues causing bugs or unpredictable behavior
+- Simplify components and state usage
+- Improve cohesion of the UI while staying within Tailwind
+- Reduce unnecessary rendering and data churn
+- Make small, disciplined improvements that unlock future scalability
+- Clearly document what I would do with more time (in `DISCUSSION.md`)
+
+Wherever a deeper optimization or refactor could not be completed within the timebox, I added rationale and next steps to **`DISCUSSION.md`**.
+
+---
+
+## 🚀 Running the Application
 
 ```bash
-npm i
-```
+# 1. Install dependencies
+npm install
 
-Run the development server:
-
-```bash
+# 2. Start the development server
 npm run dev
-```
-
-## Database set up
-
-The app is configured to return a default list of advocates. This will allow you to get the app up and running without needing to configure a database. If you’d like to configure a database, you’re encouraged to do so. You can uncomment the url in `.env` and the line in `src/app/api/advocates/route.ts` to test retrieving advocates from the database.
-
-1. Feel free to use whatever configuration of postgres you like. The project is set up to use docker-compose.yml to set up postgres. The url is in .env.
-
-```bash
-docker compose up -d
-```
-
-2. Create a `solaceassignment` database.
-
-3. Push migration to the database
-
-```bash
-npx drizzle-kit push
-```
-
-4. Seed the database
-
-```bash
-curl -X POST http://localhost:3000/api/seed
 ```
